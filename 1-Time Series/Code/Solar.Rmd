@@ -1,0 +1,70 @@
+---
+title: "Solar"
+output: pdf_document
+date: "2024-11-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+# Notes
+# 1/1/2019 -> 3/1/2019, 7/1/2022, and 8/1/2022 have been imputed by calculating the mean of the respective months
+```
+
+
+
+```{r}
+# Import Data and plot the time series object
+library(forecast)
+library(readxl)
+library(tseries)
+
+Solar <- read_excel("C:/Users/FTrou/Desktop/Vault Of Holding/04-School/Fall 2024/Solar Project/Data/Solar.xlsx")
+Solar_ts <- ts(Solar$`System Production (Wh)`, start = c(2019, 1), frequency =  12, end = c(2024,10))
+
+plot(Solar, type = 'l')
+
+```
+
+
+
+```{r}
+# View the Time Series Object
+Solar_ts
+```
+
+
+
+```{r}
+# Because there appears to be a seasonal effect, we will use Sarima to take the seasonality into account
+
+# Firstly, we will check the series for stationary by both visual inspection, as well as using the Ljung-Box test
+
+acf(Solar_ts)
+
+# Because the ACF plot shows a strong autocorrelation at lag 1, then decays, we can assume that there seems to be some non-stationary elements
+
+pacf(Solar_ts)
+
+# Because the PACF plot shows some significant lags, but little decay, we can also assume that there are non-stationary elements.
+
+Box.test(Solar_ts, type = 'Ljung-Box')
+
+# Because out p-value for the Ljung-Box test is significantly below .05 (2.52e-08), we reject the null hypothesis, further proving that there is some non-stationarity.
+```
+
+
+
+```{r}
+
+adf.test(Solar_ts)
+
+# Because the p-value for the Augmented Dickey Fuller test is smaller than .01, we reject the null hypothesis, determining that the series is stationary
+
+# while this conflicts with the above acf, pacf, and ljung-box test, this may be due to trends in out time series object.
+
+```
